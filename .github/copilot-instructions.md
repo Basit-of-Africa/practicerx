@@ -13,14 +13,22 @@ PracticeRx is an **all-in-one WordPress practice management system** for health 
 - Chiropractors
 
 **Core Features:**
-- Client Management (not "patients" - use "client" for frontend users)
-- Appointment Scheduling & Calendar
-- Billing & Invoicing
-- Encounter Reports (detailed practitioner forms)
-- Analytics & Reports
-- SMS Notifications (Twilio integration)
-- Email Notifications (automated templates)
-- Payment Gateway Integration
+- **Client Management** (not "patients" - use "client" for frontend users)
+- **Appointment Scheduling & Calendar**
+- **Treatment Programs/Packages** (sellable programs with sessions)
+- **Forms Builder** (intake forms, health questionnaires with conditional logic)
+- **Document Library** (secure file sharing with clients)
+- **Health Tracking** (vitals, labs, progress charts)
+- **Client Portal** (branded client-facing interface)
+- **Encounter Reports** (detailed practitioner forms with digital signatures)
+- **Billing & Invoicing** (payment processing, refunds)
+- **Analytics & Reports** (revenue, client growth, practitioner performance)
+- **SMS Notifications** (Twilio integration)
+- **Email Notifications** (automated templates)
+- **Payment Gateway Integration** (Stripe, WooCommerce)
+- **Telehealth Integration** (Zoom/Twilio Video conferencing)
+- **Drip Email Campaigns** (automated client engagement)
+- **Meal Planning** (recipes, meal plans, client nutrition assignments)
 
 **Tech Stack:**
 - Backend: WordPress plugin architecture, custom database tables, REST API, PSR-4 autoloading
@@ -68,6 +76,34 @@ PracticeRx is an **all-in-one WordPress practice management system** for health 
   - `SMSService` → SMS notifications via Twilio
   - `EmailService` → Email notifications with templates
   - `ReportsService` → Analytics and reporting
+  - `TelehealthService` → Video conferencing (Zoom/Twilio Video)
+  - `CampaignService` → Drip email campaign automation
+
+**25 Database Tables:**
+- `ppms_clients` - Client records (renamed from patients for inclusivity)
+- `ppms_patients` - Legacy table (use clients for new code)
+- `ppms_practitioners` - Healthcare provider records
+- `ppms_appointments` - Appointment scheduling
+- `ppms_encounters` - Session/visit records
+- `ppms_encounter_reports` - Detailed clinical notes with signatures
+- `ppms_services` - Billable services catalog
+- `ppms_invoices` - Billing invoices
+- `ppms_payments` - Payment transactions
+- `ppms_programs` - Treatment packages/programs (sellable)
+- `ppms_client_programs` - Program enrollments
+- `ppms_forms` - Form builder definitions
+- `ppms_form_submissions` - Client form responses
+- `ppms_documents` - Document library
+- `ppms_health_metrics` - Vitals, labs, measurements
+- `ppms_portal_settings` - Client portal customization
+- `ppms_sms_logs` - SMS notification history
+- `ppms_email_logs` - Email notification history
+- `ppms_telehealth_sessions` - Video session records
+- `ppms_email_campaigns` - Drip email campaign definitions
+- `ppms_campaign_subscribers` - Campaign subscriptions
+- `ppms_meal_plans` - Meal plan templates
+- `ppms_client_meal_plans` - Client meal plan assignments
+- `ppms_recipes` - Recipe library
 
 **Role & Permission System:**
 - Custom capabilities: `ppms_practitioner`, `ppms_patient`
@@ -134,6 +170,48 @@ class NewGateway implements PaymentGatewayInterface {
 case 'gateway_id':
     return new NewGateway();
 ```
+
+## Feature Modules
+
+### Telehealth Integration
+- **Service:** `TelehealthService` - Multi-provider video conferencing
+- **Providers:** Zoom (JWT authentication), Twilio Video (Room API)
+- **Model:** `TelehealthSession` - Session records with meeting URLs
+- **Controller:** `TelehealthController` - REST API for session management
+- **Features:**
+  - Create video meetings (Zoom meetings or Twilio rooms)
+  - Generate access tokens and join URLs
+  - Track session status (scheduled, in-progress, completed)
+  - End sessions and retrieve recordings
+  - Email notifications with meeting links
+- **Configuration:** Set `ppms_telehealth_provider`, `ppms_zoom_api_key`, `ppms_twilio_account_sid`
+
+### Drip Email Campaigns
+- **Service:** `CampaignService` - Automated email campaign processing
+- **Models:** `EmailCampaign`, `CampaignSubscriber`
+- **Controller:** `CampaignsController` - Campaign and subscription management
+- **Features:**
+  - Create multi-step email campaigns with delays
+  - Subscribe/unsubscribe clients to campaigns
+  - Merge tags for personalization ({{first_name}}, {{last_name}}, etc.)
+  - Event-triggered campaigns (appointment booked, program enrolled)
+  - Cron-based processing via `process_campaigns()`
+  - Track subscriber progress through campaign steps
+- **Triggers:** Manual, appointment_booked, program_enrolled, form_submitted
+
+### Meal Planning
+- **Models:** `Recipe`, `MealPlan`, `ClientMealPlan`
+- **Controllers:** `RecipesController`, `MealPlansController`, `ClientMealPlansController`
+- **Features:**
+  - Recipe library with ingredients, instructions, macros
+  - Public/private recipes for sharing
+  - Meal plan templates (breakfast, lunch, dinner, snacks)
+  - Assign meal plans to clients with customizations
+  - Track calories, protein, carbs, fats
+  - Search by meal type, tags, ingredients
+  - Duration-based plans with start/end dates
+- **Recipe Fields:** title, description, meal_type, prep_time, cook_time, servings, macros, tags
+- **Meal Plan Fields:** meals (JSON day structure), macros (JSON targets), duration_days, is_template
 
 ## Development Workflow
 
@@ -221,9 +299,9 @@ class Invoice extends AbstractModel {
 - `ppms_user_can($capability)` → Permission checks
 - `ppms_format_currency($amount, $currency)` → Currency formatting
 - `ppms_log($message, $context)` → Debug logging
-- See [includes/helpers.php](includes/helpers.php) for full listod
+- See [includes/helpers.php](includes/helpers.php) for full list
 
-**DaCore classes:** `includes/Core/` (Constants, Helper, FilterHandler, Installer, AdminPage)
+## Development Workflow**DaCore classes:** `includes/Core/` (Constants, Helper, FilterHandler, Installer, AdminPage)
 - **Database:** `includes/Database/Migrations/` for modular table definitions
 - **Filters:** `includes/Filters/` for feature-based filter classes (auto-loaded)
 - **Dual src structure:** Both `assets/js/` and `src/` exist. Use `src/` for new React code
@@ -248,11 +326,15 @@ class Invoice extends AbstractModel {
 - Capabilities: `ppms_practitioner`, `ppms_patient`
 
 **Data Flow:**
-React Components → `apiFetMedicalRecord):**
-1. Create migration in `includes/Database/Migrations/ppms-medical_records-db.php`
+React Components → `apiFetch` → WordPress REST API (`/wp-json/ppms/v1/*`) → Controllers → Models → Database
+
+## Common Development Tasks
+
+**Add new feature module (e.g., Program Management):**
+1. Create migration in `includes/Database/Migrations/ppms-programs-db.php`
 2. Add table constant to `includes/Core/Constants.php`
-3. Create `includes/Models/MedicalRecord.php` extending `AbstractModel`
-4. Create `includes/Api/MedicalRecordsController.php` with CRUD routes
+3. Create `includes/Models/Program.php` extending `AbstractModel`
+4. Create `includes/Api/ProgramsController.php` with CRUD routes
 5. Register controller in `practicerx.php` `init_rest_api()` method
 6. Create React components in `src/components/` or `src/pages/`
 7. Add granular capabilities to `Constants.php` and `Installer.php`

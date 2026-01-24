@@ -136,7 +136,19 @@ final class PracticeRx {
 			new \PracticeRx\Api\InvoicesController(),
 			new \PracticeRx\Api\ServicesController(),
 			new \PracticeRx\Api\ReportsController(),
+			new \PracticeRx\Api\ProgramsController(),
+			new \PracticeRx\Api\ClientProgramsController(),
+			new \PracticeRx\Api\FormsController(),
+			new \PracticeRx\Api\FormSubmissionsController(),
+			new \PracticeRx\Api\DocumentsController(),
+			new \PracticeRx\Api\HealthMetricsController(),
+			new \PracticeRx\Api\PortalController(),
 			new \PracticeRx\Api\SystemController(),
+			new \PracticeRx\Api\TelehealthController(),
+			new \PracticeRx\Api\CampaignsController(),
+			new \PracticeRx\Api\MealPlansController(),
+			new \PracticeRx\Api\ClientMealPlansController(),
+			new \PracticeRx\Api\RecipesController(),
 		);
 
 		foreach ( $controllers as $controller ) {

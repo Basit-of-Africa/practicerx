@@ -14,11 +14,28 @@ class Constants {
 	 */
 	const TABLE_PRACTITIONERS = 'ppms_practitioners';
 	const TABLE_PATIENTS = 'ppms_patients';
+	const TABLE_CLIENTS = 'ppms_clients';
 	const TABLE_SERVICES = 'ppms_services';
 	const TABLE_APPOINTMENTS = 'ppms_appointments';
 	const TABLE_ENCOUNTERS = 'ppms_encounters';
+	const TABLE_ENCOUNTER_REPORTS = 'ppms_encounter_reports';
 	const TABLE_INVOICES = 'ppms_invoices';
 	const TABLE_PAYMENTS = 'ppms_payments';
+	const TABLE_PROGRAMS = 'ppms_programs';
+	const TABLE_CLIENT_PROGRAMS = 'ppms_client_programs';
+	const TABLE_FORMS = 'ppms_forms';
+	const TABLE_FORM_SUBMISSIONS = 'ppms_form_submissions';
+	const TABLE_DOCUMENTS = 'ppms_documents';
+	const TABLE_HEALTH_METRICS = 'ppms_health_metrics';
+	const TABLE_PORTAL_SETTINGS = 'ppms_portal_settings';
+	const TABLE_SMS_LOGS = 'ppms_sms_logs';
+	const TABLE_EMAIL_LOGS = 'ppms_email_logs';
+	const TABLE_TELEHEALTH_SESSIONS = 'ppms_telehealth_sessions';
+	const TABLE_EMAIL_CAMPAIGNS = 'ppms_email_campaigns';
+	const TABLE_CAMPAIGN_SUBSCRIBERS = 'ppms_campaign_subscribers';
+	const TABLE_MEAL_PLANS = 'ppms_meal_plans';
+	const TABLE_CLIENT_MEAL_PLANS = 'ppms_client_meal_plans';
+	const TABLE_RECIPES = 'ppms_recipes';
 
 	/**
 	 * Option Keys (with prefix)
