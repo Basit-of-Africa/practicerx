@@ -1,0 +1,322 @@
+# PracticeRx AI Coding Assistant Instructions
+
+## Project Overview
+PracticeRx is an **all-in-one WordPress practice management system** for health professionals including:
+- Mental Health Professionals
+- Functional Medicine Practitioners
+- Health Coaches
+- Medical Doctors
+- Nutritionists & Dietitians
+- Personal Trainers
+- Nurse Practitioners
+- Naturopathic Doctors
+- Chiropractors
+
+**Core Features:**
+- Client Management (not "patients" - use "client" for frontend users)
+- Appointment Scheduling & Calendar
+- Billing & Invoicing
+- Encounter Reports (detailed practitioner forms)
+- Analytics & Reports
+- SMS Notifications (Twilio integration)
+- Email Notifications (automated templates)
+- Payment Gateway Integration
+
+**Tech Stack:**
+- Backend: WordPress plugin architecture, custom database tables, REST API, PSR-4 autoloading
+- Frontend: React (via `@wordpress/element`), custom hash-based router
+- Build: `@wordpress/scripts` (webpack-based)
+- Database: Custom tables with `ppms_` prefix
+
+## Architecture
+
+### Backend Structure (PHP - PSR-4)
+
+**Namespace Organization:**
+- `PracticeRx\` → `includes/` (main namespace)
+  - `includes/Api/` → API Controllers (REST endpoints)
+  - `includes/Models/` → Data models (Active Record pattern)
+  - `includes/Services/` → Business logic layer
+  - `includes/Core/` → Core functionality (activation, admin pages)
+  - `includes/Auth/` → Authentication & authorization
+  - `includes/Database/` → Schema definitions
+
+**Key Classes & Patterns:**
+- **Base Classes:**
+  - `AbstractModel` → Base for all data models (active record pattern)
+  - `ApiController` → Base for REST API controllers
+  - Custom tables use `ppms_` prefix (e.g., `wp_ppms_clients`, `wp_ppms_appointments`)
+
+- **Models:** Extend `AbstractModel` with static methods
+  ```php
+  Client::get($id)                    // Get by ID
+  Client::create($data)               // Create new record
+  Client::get_by_user_id($user_id)   // Custom query method
+  Client::update($id, $data)          // Update existing
+  Client::delete($id)                 // Delete record
+  Client::search($term)               // Search clients
+  ```
+
+- **API Controllers:** Extend `ApiController`, namespace `ppms/v1`
+  - Routes registered in `practicerx.php` `init_rest_api()`
+  - Permission checks via `check_permissions()` method
+  - Return `WP_Error` for errors, not exceptions
+
+- **Services Layer:** Business logic separation
+  - `BillingService` → Payment processing, invoices, refunds
+  - `AppointmentService` → Appointment management, availability
+  - `SMSService` → SMS notifications via Twilio
+  - `EmailService` → Email notifications with templates
+  - `ReportsService` → Analytics and reporting
+
+**Role & Permission System:**
+- Custom capabilities: `ppms_practitioner`, `ppms_patient`
+- Role checks: `RoleManager::is_practitioner()`, `RoleManager::is_patient()`
+- Permissions verified in API controllers via `check_permissions()` callback
+- Default permission: `current_user_can('read')`
+
+### Database Schema Management
+
+**Schema Definition:** [includes/Database/Schema.php](includes/Database/Schema.php)
+- All tables use `ppms_` prefix (Private Practice Management System)
+- Created via `Schema::create_tables()` using `dbDelta()`
+- Executed during plugin activation in `Installer::install()`
+
+**Table Structure Pattern:**
+```php
+CREATE TABLE {$wpdb->prefix}ppms_tablename (
+    id bigint(20) NOT NULL AUTO_INCREMENT,
+    field1 varchar(255) DEFAULT '',
+    field2 text DEFAULT '',
+    created_at datetime DEFAULT '0000-00-00 00:00:00',
+    updated_at datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    KEY field1 (field1)
+) $charset_collate;
+```
+
+**Schema Updates:**
+1. Modify table SQL in `Schema::create_tables()`
+2. Use `dbDelta()` for safe updates (adds columns, doesn't drop)
+3. For column alterations, use `maybe_add_column()` helper with option flags
+4. Run via plugin reactivation or programmatically call `Installer::install()`
+
+### Frontend Structure (React)
+- **Entry point:** [src/index.js](src/index.js) renders into `#practicerx-root` div
+- **Routing:** Custom hash-based router in [src/utils/Router.jsx](src/utils/Router.jsx)
+  - Navigation: `window.location.hash = newPath` or `<Link to="/path">`
+  - Routing logic is manual switch statement in [src/index.js](src/index.js#L11-L22)
+- **API calls:** Use `@wordpress/api-fetch` with paths like `/ppms/v1/patients`
+- **Layout:** [Layout.jsx](src/components/Layout.jsx) provides sidebar + content wrapper
+
+**Key Patterns:**
+- Use `@wordpress/element` instead of direct React imports for hooks
+- API root and nonce injected via `wp_localize_script` as `practicerxSettings`
+- Inline styles used throughout (no external CSS framework)
+
+### Payment Gateway System
+- **Interface:** `PaymentGatewayInterface` defines contract
+- **Factory:** `GatewayFactory::get($gateway_id)` returns gateway instances
+- **Gateways:** Extend `AbstractGateway` (Stripe, WooCommerce implemented)
+- Add new gateways by implementing interface + updating factory switch
+
+**Gateway Implementation Pattern:**
+```php
+// 1. Implement interface
+class NewGateway implements PaymentGatewayInterface {
+    public function get_id() { return 'gateway_id'; }
+    public function get_title() { return 'Gateway Name'; }
+    public function process_payment($amount, $currency, $customer, $reference) { /* logic */ }
+    public function verify_transaction($transaction_id) { /* logic */ }
+}
+
+// 2. Register in GatewayFactory::get()
+case 'gateway_id':
+    return new NewGateway();
+```
+
+## Development Workflow
+
+### Building
+```bash
+# Development with hot reload
+npm start
+
+# Production build (outputs to build/)
+npm run build
+
+# Regenerate autoloader after adding new classes
+composer dump-autoload
+```
+Build outputs: `build/index.js` and `build/index.asset.php` (dependencies manifest)
+
+### Database Changes
+1. Create new migration file in `includes/Database/Migrations/`
+2. Use `ppms_maybe_create_table()` for new tables or `ppms_maybe_add_column()` for columns
+3. Run via plugin reactivation or `Installer::install()`
+4. Migration files are auto-loaded by `Schema::create_tables()`
+
+### Adding REST Endpoints
+1. Create controller in `includes/Api/` extending `ApiController`
+2. Register routes in `register_routes()` method
+3. Add controller instantiation in [practicerx.php](practicerx.php#L122-L131) `init_rest_api()`
+
+### Adding Models
+1. Create class in `includes/Models/` extending `AbstractModel`
+2. Set `protected static $table = 'ppms_tablename'` (without wp prefix)
+3. Models auto-handle timestamps (`created_at`, `updated_at`)
+
+**Model Pattern:**
+```php
+namespace PracticeRx\Models;
+
+class Invoice extends AbstractModel {
+    protected static $table = 'ppms_invoices';
+    
+    // Add custom query methods
+    public static function get_by_patient($patient_id) {
+        global $wpdb;
+        $table = self::get_table();
+        return $wpdb->get_results(
+            $wpdb->prepare("SELECT * FROM {$table} WHERE patient_id = %d", $patient_id)
+        );
+    }
+}
+```
+
+### Adding Frontend Pages
+1. Create page component in `src/pages/`
+2. Add route in [src/index.js](src/index.js) switch statement
+3. Add navigation link in [Layout.jsx](src/components/Layout.jsx) sidebar
+
+### Adding Filter Classes
+1. Create filter class in `includes/Filters/` extending base or standalone
+2. Register hooks in `__construct()` method
+3. Files are auto-loaded by `FilterHandler::init()`
+4. Follow naming pattern: `{Feature}Filters.php`
+
+## Critical Conventions
+
+**PHP:**
+- Use WordPress coding standards (tabs, Yoda conditions)
+- Always escape output: `esc_html()`, `esc_attr()`, `esc_url_raw()`
+- Prepare SQL queries: `$wpdb->prepare()`
+- Return `WP_Error` objects for errors, not exceptions
+- Text domain: `'practicerx'` for all `__()` calls
+
+**JavaScript:**
+- Use functional components with hooks
+- Import hooks from `@wordpress/element`: `import { useState } from '@wordpress/element'`
+- Use `apiFetch` for API calls, not fetch/axios
+- Handle loading states and errors in UI
+
+**Dppms_maybe_create_table($table_name, $sql)` → Create table if doesn't exist
+- `ppms_maybe_add_column($table_name, $column_name, $sql)` → Add column if doesn't exist
+- `dbDelta()` → WordPress schema update function (safe for existing tables)
+- Use `$wpdb->get_charset_collate()` for charset/collation
+
+**Helper Functions:**
+- `ppms_get_option($name)` / `ppms_update_option($name, $value)` → Plugin options
+- `ppms_is_practitioner()` / `ppms_is_patient()` → Role checks
+- `ppms_user_can($capability)` → Permission checks
+- `ppms_format_currency($amount, $currency)` → Currency formatting
+- `ppms_log($message, $context)` → Debug logging
+- See [includes/helpers.php](includes/helpers.php) for full listod
+
+**DaCore classes:** `includes/Core/` (Constants, Helper, FilterHandler, Installer, AdminPage)
+- **Database:** `includes/Database/Migrations/` for modular table definitions
+- **Filters:** `includes/Filters/` for feature-based filter classes (auto-loaded)
+- **Dual src structure:** Both `assets/js/` and `src/` exist. Use `src/` for new React code
+- **Build artifacts:** `build/` directory is generated, do not edit manually
+- **Autoloading:** PSR-4 via Composer + custom autoloader in [practicerx.php](practicerx.php#L23-L38)
+- **Global helpers:** `includes/helpers.php` auto-loaded via Composer
+- `dbDelta()` → WordPress schema update function (safe for existing tables)
+- Use `$wpdb->get_charset_collate()` for charset/collation
+
+## File Organization
+
+- **Dual src structure:** Both `assets/js/` and `src/` exist. Use `src/` for new React code
+- **Build artifacts:** `build/` directory is generated, do not edit manually
+- **Autoloading:** PSR-4 via custom autoloader in [practicerx.php](practicerx.php#L23-L38)
+
+## Integration Points
+
+**WordPress Integration:**
+- Admin page hook: `toplevel_page_practicerx` ([AdminPage.php](includes/Core/AdminPage.php#L40))
+- Assets enqueued only on PracticeRx admin page
+- REST API namespace: `ppms/v1`
+- Capabilities: `ppms_practitioner`, `ppms_patient`
+
+**Data Flow:**
+React Components → `apiFetMedicalRecord):**
+1. Create migration in `includes/Database/Migrations/ppms-medical_records-db.php`
+2. Add table constant to `includes/Core/Constants.php`
+3. Create `includes/Models/MedicalRecord.php` extending `AbstractModel`
+4. Create `includes/Api/MedicalRecordsController.php` with CRUD routes
+5. Register controller in `practicerx.php` `init_rest_api()` method
+6. Create React components in `src/components/` or `src/pages/`
+7. Add granular capabilities to `Constants.php` and `Installer.php`
+
+**Add feature filter:**
+1. Create `includes/Filters/{Feature}Filters.php`
+2. Define hooks in `__construct()` method
+3. Auto-loaded by `FilterHandler` on initialization
+
+**Add payment gateway:**
+1. Implement `PaymentGatewayInterface` in `includes/Services/Gateways/`
+2. Optionally extend `AbstractGateway` for common methods
+3. Add case to `GatewayFactory::get()` and `get_all()`
+
+**Add helper function:**
+1. Add to `includes/helpers.php` with `ppms_` prefix
+2. Use throughout plugin for consistency
+3. Consider adding to `Helper` class for OOP access
+
+## Improvements Over KiviCare
+
+PracticeRx is designed to be lighter and more maintainable than KiviCare:
+
+**1. Centralized Constants**
+- Single source of truth for table names, capabilities, and statuses
+- Type-safe access via Constants class
+- Easy to maintain and update
+
+**2. Modular Database Migrations**
+- Individual migration files for each table
+- Easy to add/modify tables without touching core Schema class
+- Better version control and code review
+
+**3. Global Helper Functions**
+- Lightweight utility functions with `ppms_` prefix
+- Quick access without class instantiation
+- Combines best of procedural and OOP
+
+**4. Auto-loading Filter System**
+- Feature-based organization
+- Automatic discovery and initialization
+- Reduces boilerplate in main plugin file
+
+**5. Enhanced Model Capabilities**
+- Built-in query methods: `find_by()`, `count()`, pagination support
+- Consistent API across all models
+- Less boilerplate in custom queries
+
+**6. Granular Permission System**
+- Per-action capabilities (add, edit, delete, view, list)
+- Easy to extend and customize
+- Role-based access control built-in
+**Add payment gateway:**
+1. Implement `PaymentGatewayInterface` in `includes/Services/Gateways/`
+2. Optionally extend `AbstractGateway` for common methods
+3. Add case to `GatewayFactory::get()` and `get_all()`
+
+## Inspired By
+
+This codebase follows patterns from KiviCare Pro clinic management system:
+- **Filter-based architecture:** Features organized as filters/hooks for modularity
+- **Base classes:** Common functionality in base classes (KCBase → AbstractModel)
+- **Helper utilities:** Global helper functions in `utils/` for common operations
+- **Namespace pattern:** PSR-4 autoloading with clear namespace-to-folder mapping
+- **Database migrations:** Separate migration files in `database/` folder
+- **Option management:** Plugin-prefixed options (`ppms_` prefix for all options)
+- **Permission per action:** Granular permissions mapped to specific functions/actions

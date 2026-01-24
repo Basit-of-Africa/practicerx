@@ -1,0 +1,27 @@
+{
+    "name": "practicerx/practicerx",
+    "description": "Private Practice Management System for WordPress",
+    "type": "wordpress-plugin",
+    "license": "GPL-2.0-or-later",
+    "authors": [
+        {
+            "name": "PracticeRx Team",
+            "email": "support@practicerx.com"
+        }
+    ],
+    "require": {
+        "php": ">=7.4"
+    },
+    "autoload": {
+        "psr-4": {
+            "PracticeRx\\": "includes/"
+        },
+        "files": [
+            "includes/helpers.php"
+        ]
+    },
+    "config": {
+        "optimize-autoloader": true,
+        "sort-packages": true
+    }
+}
