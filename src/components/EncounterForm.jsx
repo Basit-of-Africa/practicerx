@@ -15,7 +15,7 @@ const EncounterForm = ({ patientId, onSave }) => {
             method: 'POST',
             data: {
                 patient_id: patientId,
-                practitioner_id: 1, // TODO: Get current user ID
+                practitioner_id: window.practicerxSettings?.currentUserId || 1,
                 type,
                 content,
             },

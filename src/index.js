@@ -6,6 +6,13 @@ import Appointments from './pages/Appointments';
 import Patients from './pages/Patients';
 import PatientDetail from './pages/PatientDetail';
 import Settings from './pages/Settings';
+import Telehealth from './pages/Telehealth';
+import Campaigns from './pages/Campaigns';
+import Recipes from './pages/Recipes';
+import MealPlans from './pages/MealPlans';
+import Forms from './pages/Forms';
+import Documents from './pages/Documents';
+import HealthTracking from './pages/HealthTracking';
 
 const App = () => {
     return (
@@ -17,6 +24,13 @@ const App = () => {
                     else if (path === '/appointments') content = <Appointments />;
                     else if (path === '/patients') content = <Patients />;
                     else if (path.startsWith('/patients/')) content = <PatientDetail id={path.split('/')[2]} />;
+                    else if (path === '/telehealth') content = <Telehealth />;
+                    else if (path === '/campaigns') content = <Campaigns />;
+                    else if (path === '/recipes') content = <Recipes />;
+                    else if (path === '/meal-plans') content = <MealPlans />;
+                    else if (path === '/forms') content = <Forms />;
+                    else if (path === '/documents') content = <Documents />;
+                    else if (path === '/health-tracking') content = <HealthTracking />;
                     else if (path === '/settings') content = <Settings />;
                     else content = <div>Page not found</div>;
 
