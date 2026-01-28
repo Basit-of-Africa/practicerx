@@ -117,6 +117,7 @@ final class PracticeRx {
 		\PracticeRx\Core\UserMeta::init();
 		\PracticeRx\Auth\RoleManager::init();
 		\PracticeRx\Core\AdminPage::init();
+		// \PracticeRx\Core\FrontendPage::init(); // Frontend shortcode support - temporarily disabled
 		
 		// Initialize filter handler for modular features
 		( new \PracticeRx\Core\FilterHandler() )->init();
