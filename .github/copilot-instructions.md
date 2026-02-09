@@ -141,9 +141,9 @@ CREATE TABLE {$wpdb->prefix}ppms_tablename (
 - **Entry point:** [src/index.js](../src/index.js) renders into `#practicerx-root` div
 - **Routing:** Custom hash-based router in [src/utils/Router.jsx](../src/utils/Router.jsx)
   - Navigation: `window.location.hash = newPath` or `<Link to="/path">`
-  - Routing logic is manual switch statement in [src/index.js](../src/index.js#L11-L22)
+  - Routing logic is manual switch statement in [src/index.js](../src/index.js)
 - **API calls:** Use `@wordpress/api-fetch` with paths like `/ppms/v1/patients`
-- **Layout:** [Layout.jsx](../src/components/Layout.jsx) provides sidebar + content wrapper
+- **Layout:** [src/components/Layout.jsx](../src/components/Layout.jsx) provides sidebar + content wrapper
 
 **Key Patterns:**
 - Use `@wordpress/element` instead of direct React imports for hooks
@@ -237,7 +237,7 @@ Build outputs: `build/index.js` and `build/index.asset.php` (dependencies manife
 ### Adding REST Endpoints
 1. Create controller in `includes/Api/` extending `ApiController`
 2. Register routes in `register_routes()` method
-3. Add controller instantiation in [practicerx.php](../practicerx.php#L122-L131) `init_rest_api()`
+3. Add controller instantiation in [practicerx.php](../practicerx.php) `init_rest_api()`
 
 ### Adding Models
 1. Create class in `includes/Models/` extending `AbstractModel`
@@ -265,7 +265,7 @@ class Invoice extends AbstractModel {
 ### Adding Frontend Pages
 1. Create page component in `src/pages/`
 2. Add route in [src/index.js](../src/index.js) switch statement
-3. Add navigation link in [Layout.jsx](../src/components/Layout.jsx) sidebar
+3. Add navigation link in [src/components/Layout.jsx](../src/components/Layout.jsx) sidebar
 
 ### Adding Filter Classes
 1. Create filter class in `includes/Filters/` extending base or standalone
@@ -300,13 +300,13 @@ class Invoice extends AbstractModel {
 - `ppms_format_currency($amount, $currency)` → Currency formatting
 - `ppms_log($message, $context)` → Debug logging
 - See [includes/helpers.php](../includes/helpers.php) for full list
-
-## Development Workflow**DaCore classes:** `includes/Core/` (Constants, Helper, FilterHandler, Installer, AdminPage)
+- **Autoloading:** PSR-4 via Composer + custom autoloader in [practicerx.php](../practicerx.php)
+- Admin page hook: `toplevel_page_practicerx` ([includes/Core/AdminPage.php](../includes/Core/AdminPage.php))
 - **Database:** `includes/Database/Migrations/` for modular table definitions
 - **Filters:** `includes/Filters/` for feature-based filter classes (auto-loaded)
 - **Dual src structure:** Both `assets/js/` and `src/` exist. Use `src/` for new React code
 - **Build artifacts:** `build/` directory is generated, do not edit manually
-- **Autoloading:** PSR-4 via Composer + custom autoloader in [practicerx.php](../practicerx.php#L23-L38)
+- **Autoloading:** PSR-4 via Composer + custom autoloader in [practicerx.php](../practicerx.php)
 - **Global helpers:** `includes/helpers.php` auto-loaded via Composer
 - `dbDelta()` → WordPress schema update function (safe for existing tables)
 - Use `$wpdb->get_charset_collate()` for charset/collation
@@ -315,12 +315,12 @@ class Invoice extends AbstractModel {
 
 - **Dual src structure:** Both `assets/js/` and `src/` exist. Use `src/` for new React code
 - **Build artifacts:** `build/` directory is generated, do not edit manually
-- **Autoloading:** PSR-4 via custom autoloader in [practicerx.php](../practicerx.php#L23-L38)
+- **Autoloading:** PSR-4 via custom autoloader in [practicerx.php](../practicerx.php)
 
 ## Integration Points
 
 **WordPress Integration:**
-- Admin page hook: `toplevel_page_practicerx` ([AdminPage.php](../includes/Core/AdminPage.php#L40))
+- Admin page hook: `toplevel_page_practicerx` ([includes/Core/AdminPage.php](../includes/Core/AdminPage.php))
 - Assets enqueued only on PracticeRx admin page
 - REST API namespace: `ppms/v1`
 - Capabilities: `ppms_practitioner`, `ppms_patient`
