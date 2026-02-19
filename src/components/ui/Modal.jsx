@@ -148,9 +148,9 @@ const Modal = ({ isOpen, onClose, children, title = '' }) => {
             >
                 <button aria-label="Close dialog" className="modal-close" onClick={onClose}><Icon name="x" /></button>
                 {title && <h3 id={titleId} className="text-lg font-semibold mb-3">{title}</h3>}
-                <div id={descId}>{children}</div>
-                <div className="mt-4 text-right">
-                    <button aria-label="Close dialog" className="px-4 py-2 rounded bg-gray-100" onClick={onClose}>Close</button>
+                <div id={descId} className="modal-body">{children}</div>
+                <div className="mt-4 modal-actions">
+                    <button aria-label="Close dialog" className="btn-block px-4 py-2 rounded bg-gray-100 touch-target" onClick={onClose}>Cancel</button>
                 </div>
             </div>
         </div>

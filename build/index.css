@@ -47,6 +47,68 @@ html, body, #practicerx-root {
   outline: none;
 }
 
+/* Modal responsive styles */
+.modal-content {
+  max-width: 720px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.modal-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: transparent;
+  border: none;
+  padding: 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  color: #374151;
+}
+.modal-close:active, .modal-close:focus { outline: none; box-shadow: 0 0 0 3px rgba(11,108,243,0.12); }
+
+/* Mobile adjustments */
+@media (max-width: 640px) {
+  .modal-content {
+    height: 100vh;
+    max-width: 100%;
+    border-radius: 0;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .modal-close {
+    top: 10px;
+    right: 10px;
+    padding: 12px;
+  }
+
+  .modal-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .btn-block { width: 100%; }
+
+  .create-button {
+    background: var(--color-primary);
+    color: #fff;
+    border: none;
+    padding: 12px;
+    border-radius: 8px;
+  }
+
+  .touch-target { padding: 12px; font-size: 16px; }
+}
+
+@media (min-width: 641px) {
+  .modal-actions { display: flex; justify-content: flex-end; gap: 8px; }
+  .btn-block { width: auto; }
+  .create-button { padding: 8px 14px; }
+}
+
 :root {
   --animation-fast: 150ms;
   --animation-medium: 300ms;
