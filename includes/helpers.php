@@ -254,3 +254,58 @@ function ppms_send_json( $success, $data = array(), $message = '', $status_code 
 	
 	wp_send_json( $response, $status_code );
 }
+
+/**
+ * Create a simple auth token for a user and store mapping in options.
+ *
+ * @param int $user_id
+ * @param int $ttl Seconds until expiration (default 1 day)
+ * @return string Token
+ */
+function ppms_create_auth_token( $user_id, $ttl = 86400 ) {
+	$token = wp_generate_password( 40, false, true );
+	$key = 'ppms_token_' . $token;
+	$data = array(
+		'user_id' => absint( $user_id ),
+		'exp'     => time() + absint( $ttl ),
+	);
+	add_option( $key, $data );
+	return $token;
+}
+
+/**
+ * Verify auth token and return user_id or false.
+ *
+ * @param string $token
+ * @return int|false
+ */
+function ppms_verify_auth_token( $token ) {
+	if ( empty( $token ) ) {
+		return false;
+	}
+	$key = 'ppms_token_' . sanitize_text_field( $token );
+	$data = get_option( $key );
+	if ( ! $data || ! isset( $data['user_id'] ) ) {
+		return false;
+	}
+	if ( isset( $data['exp'] ) && time() > $data['exp'] ) {
+		// expired, remove
+		delete_option( $key );
+		return false;
+	}
+	return absint( $data['user_id'] );
+}
+
+/**
+ * Revoke an auth token.
+ *
+ * @param string $token
+ * @return bool
+ */
+function ppms_revoke_auth_token( $token ) {
+	if ( empty( $token ) ) {
+		return false;
+	}
+	$key = 'ppms_token_' . sanitize_text_field( $token );
+	return delete_option( $key );
+}

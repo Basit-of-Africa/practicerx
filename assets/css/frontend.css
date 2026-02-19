@@ -12,6 +12,17 @@
     min-height: 100vh;
 }
 
+    /* Design tokens */
+    :root{
+        --prx-bg: #f7f9fb;
+        --prx-surface: #ffffff;
+        --prx-primary: #0073aa;
+        --prx-muted: #6b7280;
+        --prx-border: #e6e9ee;
+        --prx-radius: 8px;
+        --prx-sidebar-width: 240px;
+        --prx-sidebar-collapsed: 64px;
+    }
 /* Modern Color Palette - Health & Wellness Inspired */
 :root {
     --primary-color: #2d7a8c;
@@ -32,6 +43,18 @@
     --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.15);
     --radius: 8px;
     --radius-lg: 12px;
+    
+    /* Client portal starter styles */
+}
+.client-layout {
+    background: #fff;
+}
+.client-sidebar {
+    box-shadow: none;
+}
+.client-content main {
+    background: #f7f9fb;
+    min-height: calc(100vh - 60px);
 }
 
 /* Layout Container */
@@ -45,6 +68,63 @@
 .practicerx-sidebar {
     width: 260px;
     background: var(--white);
+    /* Client portal starter styles */
+    .client-layout {
+        background: var(--prx-bg);
+    }
+    .client-sidebar {
+        box-shadow: none;
+        background: var(--prx-surface);
+        width: var(--prx-sidebar-width);
+        transition: width 200ms ease;
+        height: 100vh;
+        position: fixed;
+        left: 0;
+        top: 0;
+        overflow: auto;
+    }
+    .client-sidebar.collapsed {
+        width: var(--prx-sidebar-collapsed);
+    }
+    .client-content {
+        margin-left: var(--prx-sidebar-width);
+        transition: margin-left 200ms ease;
+    }
+    .client-content.collapsed {
+        margin-left: var(--prx-sidebar-collapsed);
+    }
+    .client-content main {
+        background: transparent;
+        min-height: calc(100vh - 60px);
+    }
+
+    /* Top navigation */
+    .client-topnav {
+        background: var(--prx-surface);
+        border-bottom: 1px solid var(--prx-border);
+        padding: 8px 16px;
+        position: sticky;
+        top: 0;
+        z-index: 40;
+    }
+    .client-topnav .nav-inner {
+        display:flex;align-items:center;justify-content:space-between;gap:12px;
+    }
+    .client-topnav .brand { font-weight:700; color:var(--prx-primary); }
+    .client-topnav .nav-actions { display:flex; gap:12px; align-items:center; }
+    .client-topnav button { background:transparent;border:0;color:var(--prx-primary);cursor:pointer }
+
+    /* Dashboard cards */
+    .prx-cards { display:grid; grid-template-columns: repeat(3, 1fr); gap:16px; margin-bottom:16px }
+    .prx-card { background:var(--prx-surface); padding:16px; border:1px solid var(--prx-border); border-radius:var(--prx-radius) }
+
+    /* Responsive */
+    @media (max-width: 900px){
+        .client-sidebar { position:relative; width:100%; height:auto }
+        .client-sidebar.collapsed { width:100% }
+        .client-content, .client-content.collapsed { margin-left:0 }
+        .prx-cards { grid-template-columns: repeat(1, 1fr) }
+    }
     box-shadow: 2px 0 10px rgba(0, 0, 0, 0.05);
     padding: 0;
     position: fixed;

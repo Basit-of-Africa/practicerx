@@ -15,6 +15,14 @@ class AppointmentsController extends ApiController {
 	 * Register routes.
 	 */
 	public function register_routes() {
+		register_rest_route( $this->namespace, '/appointments/client', array(
+			array(
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => array( $this, 'get_client_items' ),
+				'permission_callback' => array( $this, 'check_permissions' ),
+			),
+		) );
+
 		register_rest_route( $this->namespace, '/appointments', array(
 			array(
 				'methods'             => WP_REST_Server::READABLE,
@@ -45,6 +53,36 @@ class AppointmentsController extends ApiController {
 				'permission_callback' => array( $this, 'check_delete_permissions' ),
 			),
 		) );
+	}
+
+	/**
+	 * Get appointments for the current authenticated client user.
+	 *
+	 * @param \WP_REST_Request $request
+	 * @return \WP_REST_Response|\WP_Error
+	 */
+	public function get_client_items( $request ) {
+		$user_id = get_current_user_id();
+		if ( ! $user_id ) {
+			return new \WP_Error( 'not_authenticated', __( 'Not authenticated', 'practicerx' ), array( 'status' => 401 ) );
+		}
+
+		$client = \PracticeRx\Models\Client::get_by_user_id( $user_id );
+		if ( ! $client ) {
+			return rest_ensure_response( array() );
+		}
+
+		// Optional date range
+		$start_date = $request->get_param( 'start_date' );
+		$end_date = $request->get_param( 'end_date' );
+
+		if ( $start_date && $end_date ) {
+			$items = \PracticeRx\Models\Appointment::get_by_range( $start_date, $end_date );
+		} else {
+			$items = \PracticeRx\Models\Appointment::get_by_patient( $client->id );
+		}
+
+		return rest_ensure_response( $items );
 	}
 
 	/**

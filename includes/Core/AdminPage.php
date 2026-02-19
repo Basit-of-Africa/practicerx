@@ -44,32 +44,47 @@ class AdminPage
 		if ('toplevel_page_practicerx' !== $hook) {
 			return;
 		}
+		$asset_path  = PRACTICERX_PATH . 'build/index.asset.php';
+		$script_path = PRACTICERX_PATH . 'build/index.js';
+		$style_path  = PRACTICERX_PATH . 'assets/css/app.css';
 
-		$asset_file = include(PRACTICERX_PATH . 'build/index.asset.php');
+		if ( ! file_exists( $asset_path ) || ! file_exists( $script_path ) ) {
+			add_action( 'admin_notices', function() {
+				echo '<div class="notice notice-error"><p>' . esc_html__( 'PracticeRx build files are missing. Run `npm run build` in the plugin root.', 'practicerx' ) . '</p></div>';
+			} );
 
-		wp_enqueue_script(
-			'practicerx-app',
-			PRACTICERX_URL . 'build/index.js',
-			$asset_file['dependencies'],
-			$asset_file['version'],
-			true
-		);
+			return;
+		}
 
-		wp_enqueue_style(
-			'practicerx-app',
-			PRACTICERX_URL . 'assets/css/app.css',
-			array('wp-components'),
-			$asset_file['version']
-		);
+		$asset_file = include $asset_path;
 
-		wp_localize_script(
-			'practicerx-app',
-			'practicerxSettings',
-			array(
-				'root' => esc_url_raw(rest_url('ppms/v1/')),
-				'nonce' => wp_create_nonce('wp_rest'),
-			)
-		);
+		if ( is_array( $asset_file ) ) {
+			wp_enqueue_script(
+				'practicerx-app',
+				PRACTICERX_URL . 'build/index.js',
+				isset( $asset_file['dependencies'] ) ? $asset_file['dependencies'] : array(),
+				isset( $asset_file['version'] ) ? $asset_file['version'] : PRACTICERX_VERSION,
+				true
+			);
+
+			if ( file_exists( $style_path ) ) {
+				wp_enqueue_style(
+					'practicerx-app',
+					PRACTICERX_URL . 'assets/css/app.css',
+					array('wp-components'),
+					isset( $asset_file['version'] ) ? $asset_file['version'] : PRACTICERX_VERSION
+				);
+			}
+
+			wp_localize_script(
+				'practicerx-app',
+				'practicerxSettings',
+				array(
+					'root' => esc_url_raw(rest_url('ppms/v1/')),
+					'nonce' => wp_create_nonce('wp_rest'),
+				)
+			);
+		}
 	}
 
 	/**

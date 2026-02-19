@@ -117,7 +117,7 @@ final class PracticeRx {
 		\PracticeRx\Core\UserMeta::init();
 		\PracticeRx\Auth\RoleManager::init();
 		\PracticeRx\Core\AdminPage::init();
-		// \PracticeRx\Core\FrontendPage::init(); // Frontend shortcode support - temporarily disabled
+		\PracticeRx\Core\FrontendPage::init(); // Frontend shortcode support - enabled
 		
 		// Initialize filter handler for modular features
 		( new \PracticeRx\Core\FilterHandler() )->init();
@@ -128,6 +128,7 @@ final class PracticeRx {
 	 */
 	public function init_rest_api() {
 		$controllers = array(
+			new \PracticeRx\Api\AuthController(),
 			new \PracticeRx\Api\AppointmentsController(),
 			new \PracticeRx\Api\ClientsController(),
 			new \PracticeRx\Api\PatientsController(),

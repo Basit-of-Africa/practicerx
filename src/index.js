@@ -13,6 +13,9 @@ import MealPlans from './pages/MealPlans';
 import Forms from './pages/Forms';
 import Documents from './pages/Documents';
 import HealthTracking from './pages/HealthTracking';
+import ClientDashboard from './pages/ClientDashboard';
+import ClientLogin from './pages/ClientLogin';
+import ClientRegister from './pages/ClientRegister';
 
 const App = () => {
     return (
@@ -32,6 +35,10 @@ const App = () => {
                     else if (path === '/documents') content = <Documents />;
                     else if (path === '/health-tracking') content = <HealthTracking />;
                     else if (path === '/settings') content = <Settings />;
+                    else if (path === '/client' || path === '/client/') content = <ClientDashboard />;
+                    else if (path === '/client/login') content = <ClientLogin />;
+                    else if (path === '/client/register') content = <ClientRegister />;
+                    else if (path.startsWith('/client/')) content = <ClientDashboard />;
                     else content = <div>Page not found</div>;
 
                     return <Layout>{content}</Layout>;
