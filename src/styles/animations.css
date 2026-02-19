@@ -1,0 +1,25 @@
+:root {
+  --animation-fast: 150ms;
+  --animation-medium: 300ms;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scaleIn {
+  from { transform: scale(0.98); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.anim-fade-in {
+  animation: fadeIn var(--animation-medium) ease-out both;
+}
+
+.anim-scale-in {
+  animation: scaleIn var(--animation-fast) cubic-bezier(.2,.9,.2,1) both;
+}
+
+.transition-opacity { transition: opacity var(--animation-medium) ease; }
+.transition-transform { transition: transform var(--animation-medium) ease; }

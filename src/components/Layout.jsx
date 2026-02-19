@@ -18,6 +18,7 @@ const Layout = ({ children }) => {
                         <li style={{ marginBottom: '10px' }}><Link to="/documents">Documents</Link></li>
                         <li style={{ marginBottom: '10px' }}><Link to="/health-tracking">Health Tracking</Link></li>
                         <li style={{ marginBottom: '10px' }}><Link to="/settings">Settings</Link></li>
+                        <li style={{ marginBottom: '10px' }}><Link to="/tokens">Tokens</Link></li>
                     </ul>
                 </nav>
             </div>

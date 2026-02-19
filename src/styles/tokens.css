@@ -1,0 +1,110 @@
+:root {
+  /* Colors */
+  --color-primary: #0b6cf3;
+  --color-accent: #7c3aed;
+  --color-surface: #ffffff;
+  --color-muted: #6b7280;
+
+  /* Typography */
+  --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+  --font-size-base: 16px;
+  --font-size-lg: 18px;
+  --font-size-sm: 14px;
+
+  /* Spacing */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+}
+
+/* Basic global styles (Tailwind integration deferred) */
+
+html, body, #practicerx-root {
+  height: 100%;
+  font-family: var(--font-sans);
+  font-size: var(--font-size-base);
+  background: var(--color-surface);
+  color: #111827;
+}
+
+.px-portal {
+  padding: var(--space-4);
+}
+
+/* Focus ring utility for accessibility */
+.focus-ring:focus {
+  outline: 3px solid rgba(11,108,243,0.16);
+  outline-offset: 2px;
+}
+
+/* Prefer keyboard focus-visible when supported */
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Modal responsive styles */
+.modal-content {
+  max-width: 720px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.modal-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: transparent;
+  border: none;
+  padding: 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  color: #374151;
+}
+.modal-close:active, .modal-close:focus { outline: none; box-shadow: 0 0 0 3px rgba(11,108,243,0.12); }
+
+/* Mobile adjustments */
+@media (max-width: 640px) {
+  .modal-content {
+    height: 100vh;
+    max-width: 100%;
+    border-radius: 0;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .modal-close {
+    top: 10px;
+    right: 10px;
+    padding: 12px;
+  }
+
+  .modal-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .btn-block { width: 100%; }
+
+  .create-button {
+    background: var(--color-primary);
+    color: #fff;
+    border: none;
+    padding: 12px;
+    border-radius: 8px;
+  }
+
+  .touch-target { padding: 12px; font-size: 16px; }
+}
+
+@media (min-width: 641px) {
+  .modal-actions { display: flex; justify-content: flex-end; gap: 8px; }
+  .btn-block { width: auto; }
+  .create-button { padding: 8px 14px; }
+}

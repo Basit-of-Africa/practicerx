@@ -263,14 +263,23 @@ function ppms_send_json( $success, $data = array(), $message = '', $status_code 
  * @return string Token
  */
 function ppms_create_auth_token( $user_id, $ttl = 86400 ) {
-	$token = wp_generate_password( 40, false, true );
-	$key = 'ppms_token_' . $token;
+	// Token format: <id>.<secret>
+	// Store only the hashed secret in options keyed by id to allow safe verification.
+	$id = wp_generate_password( 12, false, false ); // short id (alphanumeric)
+	$secret = wp_generate_password( 40, false, true ); // secret returned to client
+
+	$key = 'ppms_token_' . $id;
 	$data = array(
-		'user_id' => absint( $user_id ),
-		'exp'     => time() + absint( $ttl ),
+		'user_id'     => absint( $user_id ),
+		'secret_hash' => wp_hash_password( $secret ),
+		'exp'         => time() + absint( $ttl ),
+		'created'     => time(),
 	);
+
+	// Use add_option so tokens persist; allow multiple tokens per user.
 	add_option( $key, $data );
-	return $token;
+
+	return $id . '.' . $secret;
 }
 
 /**
@@ -283,17 +292,42 @@ function ppms_verify_auth_token( $token ) {
 	if ( empty( $token ) ) {
 		return false;
 	}
-	$key = 'ppms_token_' . sanitize_text_field( $token );
-	$data = get_option( $key );
-	if ( ! $data || ! isset( $data['user_id'] ) ) {
+	// Support new format: id.secret (we store hashed secret keyed by id)
+	if ( false !== strpos( $token, '.' ) ) {
+		list( $id, $secret ) = explode( '.', $token, 2 );
+		$id = sanitize_text_field( $id );
+		$key = 'ppms_token_' . $id;
+		$data = get_option( $key );
+
+		if ( ! $data || ! isset( $data['user_id'] ) || ! isset( $data['secret_hash'] ) ) {
+			return false;
+		}
+
+		// Check expiration
+		if ( isset( $data['exp'] ) && time() > $data['exp'] ) {
+			delete_option( $key );
+			return false;
+		}
+
+		// Verify secret against stored hash
+		if ( wp_check_password( $secret, $data['secret_hash'] ) ) {
+			return absint( $data['user_id'] );
+		}
+
 		return false;
 	}
-	if ( isset( $data['exp'] ) && time() > $data['exp'] ) {
-		// expired, remove
-		delete_option( $key );
+
+	// Backwards compatibility: legacy tokens stored with option name ppms_token_<token>
+	$legacy_key = 'ppms_token_' . sanitize_text_field( $token );
+	$legacy_data = get_option( $legacy_key );
+	if ( ! $legacy_data || ! isset( $legacy_data['user_id'] ) ) {
 		return false;
 	}
-	return absint( $data['user_id'] );
+	if ( isset( $legacy_data['exp'] ) && time() > $legacy_data['exp'] ) {
+		delete_option( $legacy_key );
+		return false;
+	}
+	return absint( $legacy_data['user_id'] );
 }
 
 /**
@@ -306,6 +340,15 @@ function ppms_revoke_auth_token( $token ) {
 	if ( empty( $token ) ) {
 		return false;
 	}
+	// If token is id.secret, remove by id
+	if ( false !== strpos( $token, '.' ) ) {
+		list( $id, $secret ) = explode( '.', $token, 2 );
+		$id = sanitize_text_field( $id );
+		$key = 'ppms_token_' . $id;
+		return delete_option( $key );
+	}
+
+	// Otherwise try legacy key
 	$key = 'ppms_token_' . sanitize_text_field( $token );
 	return delete_option( $key );
 }

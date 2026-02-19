@@ -1,4 +1,6 @@
 import { render } from '@wordpress/element';
+import './styles/tokens.css';
+import './styles/animations.css';
 import { Router, RouterContext } from './utils/Router';
 import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
@@ -16,6 +18,9 @@ import HealthTracking from './pages/HealthTracking';
 import ClientDashboard from './pages/ClientDashboard';
 import ClientLogin from './pages/ClientLogin';
 import ClientRegister from './pages/ClientRegister';
+import ClientAppointments from './pages/ClientAppointments';
+import ClientTokens from './pages/ClientTokens';
+import TokensAdmin from './pages/TokensAdmin';
 
 const App = () => {
     return (
@@ -35,10 +40,12 @@ const App = () => {
                     else if (path === '/documents') content = <Documents />;
                     else if (path === '/health-tracking') content = <HealthTracking />;
                     else if (path === '/settings') content = <Settings />;
+                    else if (path === '/tokens') content = <TokensAdmin />;
                     else if (path === '/client' || path === '/client/') content = <ClientDashboard />;
                     else if (path === '/client/login') content = <ClientLogin />;
                     else if (path === '/client/register') content = <ClientRegister />;
-                    else if (path.startsWith('/client/')) content = <ClientDashboard />;
+                    else if (path === '/client/appointments') content = <ClientAppointments />;
+                    else if (path === '/client/tokens') content = <ClientTokens />;
                     else content = <div>Page not found</div>;
 
                     return <Layout>{content}</Layout>;

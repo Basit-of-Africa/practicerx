@@ -1,0 +1,75 @@
+:root {
+  /* Colors */
+  --color-primary: #0b6cf3;
+  --color-accent: #7c3aed;
+  --color-surface: #ffffff;
+  --color-muted: #6b7280;
+
+  /* Typography */
+  --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+  --font-size-base: 16px;
+  --font-size-lg: 18px;
+  --font-size-sm: 14px;
+
+  /* Spacing */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+}
+
+/* Basic global styles (Tailwind integration deferred) */
+
+html, body, #practicerx-root {
+  height: 100%;
+  font-family: var(--font-sans);
+  font-size: var(--font-size-base);
+  background: var(--color-surface);
+  color: #111827;
+}
+
+.px-portal {
+  padding: var(--space-4);
+}
+
+/* Focus ring utility for accessibility */
+.focus-ring:focus {
+  outline: 3px solid rgba(11,108,243,0.16);
+  outline-offset: 2px;
+}
+
+/* Prefer keyboard focus-visible when supported */
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+:root {
+  --animation-fast: 150ms;
+  --animation-medium: 300ms;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scaleIn {
+  from { transform: scale(0.98); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.anim-fade-in {
+  animation: fadeIn var(--animation-medium) ease-out both;
+}
+
+.anim-scale-in {
+  animation: scaleIn var(--animation-fast) cubic-bezier(.2,.9,.2,1) both;
+}
+
+.transition-opacity { transition: opacity var(--animation-medium) ease; }
+.transition-transform { transition: transform var(--animation-medium) ease; }
+
