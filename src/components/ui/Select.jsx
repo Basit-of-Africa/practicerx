@@ -5,7 +5,7 @@ const Select = ({ value, onChange, options = [], className = '', ...props }) => 
         <select
             value={value}
             onChange={onChange}
-            className={`border rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-primary ${className}`}
+            className={`input ${className}`}
             {...props}
         >
             {options.map((o) => (

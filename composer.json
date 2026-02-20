@@ -10,7 +10,8 @@
         }
     ],
     "require": {
-        "php": ">=7.4"
+        "php": ">=7.4",
+        "google/apiclient": "^2.19"
     },
     "autoload": {
         "psr-4": {

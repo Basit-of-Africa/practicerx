@@ -1,8 +1,10 @@
 import { render } from '@wordpress/element';
 import './styles/tokens.css';
 import './styles/animations.css';
+import './styles/theme.css';
 import { Router, RouterContext } from './utils/Router';
 import Layout from './components/Layout';
+import { ThemeProvider, ToastProvider } from './components/ui';
 import Dashboard from './pages/Dashboard';
 import Appointments from './pages/Appointments';
 import Patients from './pages/Patients';
@@ -57,5 +59,12 @@ const App = () => {
 
 const root = document.getElementById('practicerx-root');
 if (root) {
-    render(<App />, root);
+    render(
+        <ThemeProvider>
+            <ToastProvider>
+                <App />
+            </ToastProvider>
+        </ThemeProvider>,
+        root
+    );
 }

@@ -1,14 +1,13 @@
 import React from 'react';
 
-const Button = ({ children, variant = 'primary', className = '', ...props }) => {
-    const base = 'inline-flex items-center justify-center px-4 py-2 rounded';
+const Button = ({ children, variant = 'primary', className = '', type = 'button', ...props }) => {
     const variants = {
-        primary: 'bg-primary text-white hover:opacity-95',
-        ghost: 'bg-transparent text-primary border border-gray-200',
+        primary: 'btn btn-primary',
+        ghost: 'btn btn-ghost',
     };
 
     return (
-        <button className={`${base} ${variants[variant] || variants.primary} ${className}`} {...props}>
+        <button type={type} className={`${variants[variant] || variants.primary} ${className}`} {...props}>
             {children}
         </button>
     );

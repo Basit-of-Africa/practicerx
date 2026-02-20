@@ -143,7 +143,65 @@ class AppointmentsController extends ApiController {
 	public function create_item( $request ) {
 		$data = $request->get_json_params();
 		
+		// If patient_id not provided, allow creating a guest client from provided details
+		if ( empty( $data['patient_id'] ) ) {
+			// Accept either client_name (single string) or first_name/last_name
+			$first_name = '';
+			$last_name = '';
+			if ( ! empty( $data['client_name'] ) ) {
+				$name_parts = preg_split( '/\s+/', sanitize_text_field( $data['client_name'] ), 2 );
+				$first_name = isset( $name_parts[0] ) ? $name_parts[0] : '';
+				$last_name = isset( $name_parts[1] ) ? $name_parts[1] : '';
+			} else {
+				$first_name = ! empty( $data['first_name'] ) ? sanitize_text_field( $data['first_name'] ) : '';
+				$last_name = ! empty( $data['last_name'] ) ? sanitize_text_field( $data['last_name'] ) : '';
+			}
+
+			$email = ! empty( $data['client_email'] ) ? sanitize_email( $data['client_email'] ) : ( ! empty( $data['email'] ) ? sanitize_email( $data['email'] ) : '' );
+			$phone = ! empty( $data['phone'] ) ? sanitize_text_field( $data['phone'] ) : '';
+
+			if ( empty( $first_name ) || empty( $email ) ) {
+				return new \WP_Error( 'missing_client_info', __( 'Client name and email are required for guest bookings.', 'practicerx' ), array( 'status' => 400 ) );
+			}
+
+			if ( ! is_email( $email ) ) {
+				return new \WP_Error( 'invalid_email', __( 'Invalid client email address.', 'practicerx' ), array( 'status' => 400 ) );
+			}
+
+			// Create client record (no WP user) or reuse existing by email
+			$existing = \PracticeRx\Models\Client::find_by( array( 'email' => $email ) );
+			if ( ! empty( $existing ) ) {
+				$client = $existing[0];
+				$patient_id = $client->id;
+			} else {
+				$client_data = array(
+					'user_id' => 0,
+					'first_name' => $first_name,
+					'last_name' => $last_name,
+					'email' => $email,
+					'phone' => $phone,
+					'status' => 'active',
+					'created_at' => current_time( 'mysql' ),
+				);
+
+				$patient_id = \PracticeRx\Models\Client::create( $client_data );
+				if ( ! $patient_id ) {
+					return new \WP_Error( 'create_client_failed', __( 'Failed to create client for booking.', 'practicerx' ), array( 'status' => 500 ) );
+				}
+			}
+
+			// Attach patient_id to appointment data for validation/save
+			$data['patient_id'] = absint( $patient_id );
+		}
+
 		// Validate data
+		// Extract RSVP/attendees updates separately
+		$attendees_update = null;
+		if ( isset( $data['attendees'] ) ) {
+			$attendees_update = $data['attendees'];
+			unset( $data['attendees'] );
+		}
+
 		$validated = Helper::validate_appointment_data( $data );
 
 		if ( is_wp_error( $validated ) ) {
@@ -220,6 +278,12 @@ class AppointmentsController extends ApiController {
 
 		do_action( 'ppms_after_appointment_updated', $id, $validated );
 
+		// If attendee RSVP/status updates were provided, persist them on the appointment
+		if ( ! empty( $attendees_update ) && is_array( $attendees_update ) ) {
+			Appointment::update( $id, array( 'meeting_attendees' => wp_json_encode( $attendees_update ) ) );
+			do_action( 'ppms_after_appointment_attendees_updated', $id, $attendees_update );
+		}
+
 		return rest_ensure_response( Helper::format_response( true, Appointment::get( $id ), __( 'Appointment updated successfully', 'practicerx' ) ) );
 	}
 
@@ -266,7 +330,30 @@ class AppointmentsController extends ApiController {
 	 * Check create permissions.
 	 */
 	public function check_create_permissions( $request ) {
-		return ppms_user_can( Constants::CAP_APPOINTMENT_ADD );
+		// Allow if current user (cookie-auth) has the capability
+		if ( ppms_user_can( Constants::CAP_APPOINTMENT_ADD ) ) {
+			return true;
+		}
+
+		// Allow if base API auth passes (Bearer token will set current user)
+		$base = $this->check_permissions( $request );
+		if ( true === $base ) {
+			return true;
+		}
+
+		// Allow requests with a valid REST nonce header (X-WP-Nonce)
+		$nonce = '';
+		if ( is_a( $request, '\\WP_REST_Request' ) ) {
+			$nonce = $request->get_header( 'x_wp_nonce' ) ?: $request->get_header( 'x-wp-nonce' );
+		} elseif ( isset( $_SERVER['HTTP_X_WP_NONCE'] ) ) {
+			$nonce = wp_unslash( $_SERVER['HTTP_X_WP_NONCE'] );
+		}
+
+		if ( $nonce && wp_verify_nonce( $nonce, 'wp_rest' ) ) {
+			return true;
+		}
+
+		return new \WP_Error( 'rest_forbidden', __( 'You cannot create appointments.', 'practicerx' ), array( 'status' => 403 ) );
 	}
 
 	/**

@@ -1,6 +1,7 @@
 import { useState } from '@wordpress/element';
 import { useContext } from '@wordpress/element';
 import { RouterContext } from '../utils/Router';
+import { Input, Label } from '../components/ui';
 
 const ClientLogin = () => {
     const [email, setEmail] = useState('');
@@ -37,12 +38,12 @@ const ClientLogin = () => {
             <h2>Client Login</h2>
             <form onSubmit={handleSubmit}>
                 <div>
-                    <label>Email</label>
-                    <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+                    <Label htmlFor="login-email">Email</Label>
+                    <Input id="login-email" name="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
                 </div>
                 <div>
-                    <label>Password</label>
-                    <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
+                    <Label htmlFor="login-password">Password</Label>
+                    <Input id="login-password" name="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
                 </div>
                 {error && <div style={{ color: 'red' }}>{error}</div>}
                 <button type="submit">Login</button>

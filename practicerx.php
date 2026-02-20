@@ -118,7 +118,13 @@ final class PracticeRx {
 		\PracticeRx\Auth\RoleManager::init();
 		\PracticeRx\Core\AdminPage::init();
 		\PracticeRx\Core\FrontendPage::init(); // Frontend shortcode support - enabled
-		
+
+		// Notification services
+		\PracticeRx\Services\AppointmentNotifications::init();
+
+		// Settings page
+		\PracticeRx\Core\SettingsPage::init();
+
 		// Initialize filter handler for modular features
 		( new \PracticeRx\Core\FilterHandler() )->init();
 	}

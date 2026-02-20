@@ -6,7 +6,7 @@ const Textarea = ({ value, onChange, placeholder = '', className = '', ...props 
             value={value}
             onChange={onChange}
             placeholder={placeholder}
-            className={`border rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-primary ${className}`}
+            className={`textarea ${className}`}
             {...props}
         />
     );

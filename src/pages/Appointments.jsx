@@ -1,17 +1,58 @@
 import Calendar from '../components/Calendar';
-import { Card, Button, Icon, Modal, Form, Input, Select, Textarea } from '../components/ui';
+import { Card, Button, Icon, Modal, Form, Input, Select, Textarea, Label, useToast } from '../components/ui';
 import { useState } from '@wordpress/element';
 
 const Appointments = () => {
     const [open, setOpen] = useState(false);
+    const [clientName, setClientName] = useState('');
+    const [service, setService] = useState('consult');
+    const [notes, setNotes] = useState('');
 
-    const handleSubmit = (formData) => {
-        // Minimal demo submission; convert FormData to object
-        const obj = {};
-        for (let pair of formData.entries()) obj[pair[0]] = pair[1];
-        console.log('Booking data', obj);
-        setOpen(false);
-        alert('Booking created (demo)');
+    const { addToast } = useToast();
+    const [loading, setLoading] = useState(false);
+    const [formError, setFormError] = useState('');
+
+    const handleSubmit = async (data) => {
+        setFormError('');
+
+        // Basic client-side validation
+        if (!data.client_name || !data.client_name.trim()) {
+            setFormError('Client name is required');
+            return;
+        }
+
+        setLoading(true);
+        try {
+            const res = await fetch(practicerxSettings.root + 'appointments', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-WP-Nonce': practicerxSettings.nonce,
+                },
+                body: JSON.stringify(data),
+            });
+
+            const result = await res.json();
+            if (!res.ok) {
+                const msg = (result && result.message) || 'Failed to create appointment';
+                addToast({ title: 'Error', description: msg, variant: 'default' });
+                setFormError(msg);
+                setLoading(false);
+                return;
+            }
+
+            addToast({ title: 'Booked', description: 'Appointment created', variant: 'primary' });
+            // reset fields
+            setClientName('');
+            setService('consult');
+            setNotes('');
+            setOpen(false);
+        } catch (err) {
+            setFormError('Network error');
+            addToast({ title: 'Network error', description: String(err), variant: 'default' });
+        } finally {
+            setLoading(false);
+        }
     };
     return (
         <div className="practicerx-page px-portal">
@@ -55,17 +96,14 @@ const Appointments = () => {
             <Modal isOpen={open} onClose={() => setOpen(false)} title="New Booking">
                 <Form onSubmit={handleSubmit}>
                     <div style={{ display: 'grid', gap: '8px' }}>
-                        <label>Client Name</label>
-                        <input name="client_name" className="border rounded px-3 py-3 touch-target" />
+                            <Label htmlFor="ap-client-name">Client Name</Label>
+                            <Input id="ap-client-name" name="client_name" className="touch-target" value={clientName} onChange={(e) => setClientName(e.target.value)} />
 
-                        <label>Service</label>
-                        <select name="service" className="border rounded px-3 py-3 touch-target">
-                            <option value="consult">Consultation</option>
-                            <option value="followup">Follow-up</option>
-                        </select>
+                            <Label htmlFor="ap-service">Service</Label>
+                            <Select id="ap-service" name="service" className="touch-target" value={service} onChange={(e) => setService(e.target.value)} options={[{ value: 'consult', label: 'Consultation' }, { value: 'followup', label: 'Follow-up' }]} />
 
-                        <label>Notes</label>
-                        <textarea name="notes" className="border rounded px-3 py-3 touch-target" />
+                            <Label htmlFor="ap-notes">Notes</Label>
+                            <Textarea id="ap-notes" name="notes" className="touch-target" value={notes} onChange={(e) => setNotes(e.target.value)} />
 
                         <div className="modal-actions" style={{ marginTop: '8px' }}>
                             <Button variant="ghost" onClick={() => setOpen(false)} className="btn-block">Cancel</Button>

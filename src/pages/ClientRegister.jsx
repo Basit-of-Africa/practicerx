@@ -1,5 +1,6 @@
 import { useState, useContext } from '@wordpress/element';
 import { RouterContext } from '../utils/Router';
+import { Input, Label } from '../components/ui';
 
 const ClientRegister = () => {
     const [email, setEmail] = useState('');
@@ -37,20 +38,20 @@ const ClientRegister = () => {
             <h2>Client Register</h2>
             <form onSubmit={handleSubmit}>
                 <div>
-                    <label>First name</label>
-                    <input value={firstName} onChange={(e) => setFirstName(e.target.value)} />
+                    <Label htmlFor="reg-first">First name</Label>
+                    <Input id="reg-first" name="first_name" value={firstName} onChange={(e) => setFirstName(e.target.value)} />
                 </div>
                 <div>
-                    <label>Last name</label>
-                    <input value={lastName} onChange={(e) => setLastName(e.target.value)} />
+                    <Label htmlFor="reg-last">Last name</Label>
+                    <Input id="reg-last" name="last_name" value={lastName} onChange={(e) => setLastName(e.target.value)} />
                 </div>
                 <div>
-                    <label>Email</label>
-                    <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+                    <Label htmlFor="reg-email">Email</Label>
+                    <Input id="reg-email" name="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
                 </div>
                 <div>
-                    <label>Password</label>
-                    <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
+                    <Label htmlFor="reg-password">Password</Label>
+                    <Input id="reg-password" name="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
                 </div>
                 {error && <div style={{ color: 'red' }}>{error}</div>}
                 <button type="submit">Register</button>

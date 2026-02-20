@@ -4,7 +4,7 @@ const ClientHeader = () => {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div style={{ fontWeight: 600 }}>Client Portal</div>
                 <div>
-                    <a href="#" style={{ color: '#0073aa', textDecoration: 'none' }}>Logout</a>
+                    <button onClick={() => alert('Logout (demo)')} style={{ color: '#0073aa', textDecoration: 'none', background: 'transparent', border: 'none', cursor: 'pointer' }} aria-label="Logout">Logout</button>
                 </div>
             </div>
         </header>

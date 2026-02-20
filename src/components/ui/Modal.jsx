@@ -135,7 +135,7 @@ const Modal = ({ isOpen, onClose, children, title = '' }) => {
     const titleId = title ? 'prx-modal-title' : undefined;
     const descId = title ? 'prx-modal-desc' : undefined;
 
-    return (
+    return ( 
         <div ref={containerRef} className="fixed inset-0 z-50 flex items-center justify-center" aria-hidden={!isOpen}>
             <div className="absolute inset-0 bg-black opacity-40 anim-fade-in" onClick={onClose} />
             <div

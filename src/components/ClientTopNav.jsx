@@ -8,7 +8,7 @@ const ClientTopNav = ({ onToggle, collapsed }) => {
             <div className="nav-actions">
                 <div style={{ color: '#6b7280' }}>Welcome</div>
                 <div>
-                    <a href="#" style={{ color: '#0073aa', textDecoration: 'none' }}>Profile</a>
+                    <button onClick={() => window.location.hash = '#/client/profile'} style={{ color: '#0073aa', textDecoration: 'none', background: 'transparent', border: 'none', cursor: 'pointer' }} aria-label="Profile">Profile</button>
                 </div>
             </div>
         </div>

@@ -7,7 +7,7 @@ const Input = ({ value, onChange, placeholder = '', type = 'text', className = '
             value={value}
             onChange={onChange}
             placeholder={placeholder}
-            className={`border rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-primary ${className}`}
+            className={`input focus:outline-none focus:ring-2 focus:ring-primary ${className}`}
             {...props}
         />
     );

@@ -8,7 +8,9 @@
         "start": "wp-scripts start",
         "format": "wp-scripts format",
         "lint:js": "wp-scripts lint-js",
-        "packages-update": "wp-scripts packages-update"
+        "packages-update": "wp-scripts packages-update",
+        "a11y:pa11y": "npx pa11y http://localhost/wp-admin/admin.php?page=practicerx",
+        "a11y:axe": "npx @axe-core/cli http://localhost/wp-admin/admin.php?page=practicerx"
     },
     "keywords": [
         "wordpress",
